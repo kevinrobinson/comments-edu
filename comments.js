@@ -1,0 +1,109 @@
+const {OAuth2Client} = require('google-auth-library');
+const {Pool} = require('pg');
+
+// For querying the database
+function createPool() {
+  const connectionString = (process.env.NODE_ENV === 'development')
+    ? process.env.DATABASE_URL
+    : process.env.DATABASE_URL +'?ssl=true';
+
+  return new Pool({connectionString});
+}
+
+function readClientId() {
+  return process.env.GOOGLE_CLIENT_ID;
+}
+
+function readAllowedDomains() {
+  return (process.env.ALLOWED_GOOGLE_DOMAINS || '').split(',');
+}
+
+function postComment(pool, req, res) {  
+  const {idToken, commentText, byText} = req.body;
+  const threadId = 'k7';
+  if (!threadId || !commentText || !byText) {
+    console.log('Invalid post, missing data');
+    return res.status(422).end();
+  }
+
+  verifyOrThrow(idToken)
+    .then(() => insertComment(pool, {threadId, commentText, byText}))
+    .then(() => res.json({success: true}))
+    .catch(error => {
+      console.error(error);
+      res.status(500);
+    });
+}
+
+async function verifyOrThrow(idToken) {
+  const clientId = readClientId();
+  const client = new OAuth2Client(clientId);
+  const ticket = await client.verifyIdToken({
+    idToken: idToken,
+    audience: clientId
+  });
+  const payload = ticket.getPayload();
+  const userId = payload['sub'];
+  const domain = payload['hd'];
+
+  const isSafelistedDomain = (readAllowedDomains().indexOf(domain) !== -1);
+  if (!isSafelistedDomain) throw new Error('not authorized; domain not in safelist');
+
+  return;
+}
+
+
+function flagComment(pool, req, res) {
+  const {commentId} = req.body;
+  
+  // TODO(kr)
+}
+
+
+// TODO(kr) guard threadId
+// TODO(kr) database constraints
+function insertComment(pool, {threadId, commentText, byText}) {
+  const sql = `INSERT INTO comments(thread_id, comment_text, by_text, timestampz) VALUES ($1, $2, $3, $4)`;
+  const now = new Date();
+  const values = [threadId, commentText, byText, now];
+  return pool.query(sql, values)
+    .then(response => {
+      console.log('added a comment!');
+      return {success: true};
+    })
+    .catch(error => {
+      console.log('insertComment error', threadId, error);
+      return null;
+    });
+}
+
+// artifical 100 comment limit
+function fetchComments(pool, req, res) {
+  const threadId = 'k7';
+  queryComments(pool, threadId)
+    .then(rows => res.json({comments: rows}))
+    .catch(error => {
+      console.error(error);
+      res.status(500);
+    });
+}
+
+function queryComments(pool, threadId) {
+  // req.json([{commentText: 'hello', id:'123', byText: 'Kevin'}]);
+  
+  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz DESC LIMIT 100';
+  const values = [threadId];
+  return pool.query(sql, values)
+    .then(response => response.rows)
+    .catch(error => {
+      console.log('fetchComments', threadId, error);
+      return null;
+    });
+}
+
+module.exports = {
+  postComment,
+  flagComment,
+  fetchComments, 
+  createPool
+};
