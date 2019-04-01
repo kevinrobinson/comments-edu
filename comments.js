@@ -77,26 +77,30 @@ function insertComment(pool, {threadId, commentText, byText}) {
     });
 }
 
-// artifical 100 comment limit
+
 function fetchComments(pool, req, res) {
   const threadId = 'k7';
-  queryComments(pool, threadId)
+  const idToken = 'foo';
+
+  verifyOrThrow(idToken)
+    .then(() => queryComments(pool, threadId))
     .then(rows => res.json({comments: rows}))
     .catch(error => {
-      console.error(error);
+      console.error('fetchComments', threadId, error);
       res.status(500);
     });
 }
 
-function queryComments(pool, threadId) {
-  // req.json([{commentText: 'hello', id:'123', byText: 'Kevin'}]);
-  
-  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz DESC LIMIT 100';
-  const values = [threadId];
+
+
+function queryComments(pool, threadId, options = {}) {
+  const limit = options.limit || 100;
+  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz DESC LIMIT $2';
+  const values = [threadId, limit];
   return pool.query(sql, values)
     .then(response => response.rows)
     .catch(error => {
-      console.log('fetchComments', threadId, error);
+      console.log('queryComments', threadId, error);
       return null;
     });
 }
