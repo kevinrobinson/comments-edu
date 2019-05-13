@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from 'react';
-import gapi from 'gapi';
 
 
 export default function App(props) {
