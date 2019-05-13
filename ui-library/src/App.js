@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react';
+import gapi from 'gapi';
+
 
 export default function App(props) {
   const googleClientId = process.env.REACT_GOOGLE_CLIENT_ID;
@@ -26,17 +28,15 @@ function GoogleSignIn({children, clientId}) {
   const [googleUser, setGoogleUser] = useState(null);
   const profile = (googleUser ? googleUser.getBasicProfile() : null);
   const idToken = (googleUser ? googleUser.getAuthResponse().id_token : null);
-  const [gapi, setGapi] = useState(null);
-  useEffect(() => require('gapi'), []);
 
   useEffect(() => {
-    gapi.load('auth2', () => {
+    window.gapi.load('auth2', () => {
       gapi.auth2.init({client_id: clientId}).then(auth2 => {
         const user = auth2.currentUser.get();
         setGoogleUser(user);
       });
     });
-  }, [gapi, idToken, googleUser]);
+  }, [idToken, googleUser]);
 
   return children({idToken, profile});
 };
