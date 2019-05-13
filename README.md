@@ -24,3 +24,11 @@ Make a Postgres database, with tables:
   timestampz timestamptz
 );
 ```
+
+## Build UI library
+```
+cd ui-library && yarn install && yarn build \
+  REACT_GOOGLE_CLIENT_ID=xyz
+  REACT_COMMENTS_EDU_DOMAIN=https://example.com
+cp build/static/js/main.*.js ../public/library.js
+```
