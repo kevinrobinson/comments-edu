@@ -2,16 +2,18 @@ import React, {useState, useEffect} from 'react';
 
 
 export default function App(props) {
-  const googleClientId = process.env.REACT_GOOGLE_CLIENT_ID;
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
   
   return (
     <div className="CommentsEdu">
       <div className="CommentsEdu-title">Comments</div>
-      <GoogleSignIn clientId={googleClientId}>
-        {({idToken, profile}) => (
-          <CommentAs idToken={idToken} profile={profile} />
-        )}
-      </GoogleSignIn>
+      <GoogleApi>{gapi => (
+        <GoogleSignIn clientId={googleClientId} gapi={gapi}>
+          {({idToken, profile}) => (
+            <CommentAs idToken={idToken} profile={profile} />
+          )}
+        </GoogleSignIn>
+      )}</GoogleApi>
       <ExistingComments />
     </div>
   );
@@ -20,22 +22,60 @@ export default function App(props) {
 
 // Where is the server?
 function readCommentsEduDomain() {
-  return process.env.REACT_COMMENTS_EDU_DOMAIN;
+  return process.env.REACT_APP_COMMENTS_EDU_DOMAIN;
 }
 
-function GoogleSignIn({children, clientId}) {
+// Wait for script tag 
+class GoogleApi extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      gapi: null
+    };
+    this.interval = null;
+    this.onTick = this.onTick.bind(this);
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(this.onTick, 500);
+  }
+
+  componentDidUnmount() {
+    this.clear();
+  }
+
+  clear() {
+    if (this.interval) clearInterval(this.interval);
+  }
+
+  onTick() {
+    if (window.gapi) {
+      this.clear();
+      this.setState({gapi: window.gapi});
+    }
+  }
+
+  render() {
+    const {children} = this.props;
+    const {gapi} = this.state;
+    return (gapi) ? children(gapi) : null;
+  }
+}
+
+function GoogleSignIn({children, clientId, gapi}) {
   const [googleUser, setGoogleUser] = useState(null);
   const profile = (googleUser ? googleUser.getBasicProfile() : null);
   const idToken = (googleUser ? googleUser.getAuthResponse().id_token : null);
 
+  // do authentication
   useEffect(() => {
-    window.gapi.load('auth2', () => {
+    gapi.load('auth2', () => {
       gapi.auth2.init({client_id: clientId}).then(auth2 => {
         const user = auth2.currentUser.get();
         setGoogleUser(user);
       });
     });
-  }, [idToken, googleUser]);
+  }, [gapi, idToken, googleUser]);
 
   return children({idToken, profile});
 };

@@ -26,9 +26,14 @@ Make a Postgres database, with tables:
 ```
 
 ## Build UI library
+Note that the config here is different for dev and production.
 ```
-cd ui-library && yarn install && yarn build \
-  REACT_GOOGLE_CLIENT_ID=xyz
-  REACT_COMMENTS_EDU_DOMAIN=https://example.com
+cd ui-library && yarn install && \
+  REACT_APP_GOOGLE_CLIENT_ID=xyz \
+  REACT_APP_COMMENTS_EDU_DOMAIN=https://example.com \
+  yarn build
 cp build/static/js/main.*.js ../public/library.js
 ```
+
+## Use UI library
+See `public/dev.html`, and note that config is different for dev and production.
