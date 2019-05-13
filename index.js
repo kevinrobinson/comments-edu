@@ -57,9 +57,9 @@ app.post('/comments/:thread_id/flag', flagComment.bind(null, pool));
 app.get('/comments/:thread_id', fetchComments.bind(null, pool));
 /* ----------------------------------------------- */
 
-
 // start server
 const PORT = process.env.PORT || 5000;
 app.get('/hello', (req, res) => res.json({hello: 'world'}));
+app.use(express.static('public'))
 app.get('*', (req, res) => res.status(404).json({status: '404'}));
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
