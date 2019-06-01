@@ -18,8 +18,14 @@ function readTokenHeader(req) {
   return req.header('X-Comments-Edu-Token');
 }
 
+// determine threadId by project, assuming all projects
+// are public.  this just checks referer, so it's
+// convenience and not a full authorization check
 function readThreadId(req) {
-  return 'k7';
+  const referrer = req.header('Referer');
+  const match = pathToRegexp('https://codeprojects.org/:id/').exec(referrer);
+  if (!match) return '[default-thread]';
+  return match[1];
 }
 
 function readAllowedDomains() {
