@@ -1,3 +1,4 @@
+const pathToRegexp = require('path-to-regexp');
 const {OAuth2Client} = require('google-auth-library');
 const {Pool} = require('pg');
 
