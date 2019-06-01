@@ -78,6 +78,7 @@ function flagComment(pool, req, res) {
     return res.status(422).end();
   }
 
+  console.log('flagComment recorded');
   verifyOrThrow(idToken)
     .then(() => insertFlag(pool, {threadId, commentId, html, location}))
     .then(() => res.json({success: true}))
@@ -124,9 +125,10 @@ function insertFlag(pool, {threadId, commentId, html, location}) {
 function fetchComments(pool, req, res) {
   const threadId = readThreadId(req);
   const idToken = readTokenHeader(req);
+  const includeFlagged = req.query.flagged || false;
 
   verifyOrThrow(idToken)
-    .then(() => queryComments(pool, threadId))
+    .then(() => queryComments(pool, threadId, {includeFlagged}))
     .then(rows => res.json({comments: rows}))
     .catch(error => {
       console.error('fetchComments', threadId, error);
@@ -138,14 +140,34 @@ function fetchComments(pool, req, res) {
 
 function queryComments(pool, threadId, options = {}) {
   const limit = options.limit || 100;
-  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz ASC LIMIT $2';
-  const values = [threadId, limit];
-  return pool.query(sql, values)
-    .then(response => response.rows)
+  const includeFlagged = options.includeFlagged || false;
+  const query = (includeFlagged)
+    ? queryCommentsIncludingFlagged(pool, threadId, limit)
+    : queryCommentsDefault(pool, threadId, limit);
+
+  return query.then(response => response.rows)
     .catch(error => {
       console.log('queryComments', threadId, error);
       return null;
     });
+}
+
+// exclude flagged comments
+function queryCommentsDefault(pool, threadId, limit) {
+  const sql = `
+    SELECT * FROM comments
+    WHERE thread_id = $1
+      AND id NOT IN (SELECT comment_id FROM flags)
+    ORDER BY timestampz ASC LIMIT $2
+  `;
+  const values = [threadId, limit];
+  return pool.query(sql, values)
+}
+
+function queryForIncludingFlagged(pool, threadId, limit) {
+  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz ASC LIMIT $2';
+  const values = [threadId, limit];
+  return pool.query(sql, values)
 }
 
 module.exports = {
