@@ -14,13 +14,22 @@ function readClientId() {
   return process.env.GOOGLE_CLIENT_ID;
 }
 
+function readTokenHeader(req) {
+  return req.header('X-Comments-Edu-Token');
+}
+
+function readThreadId(req) {
+  return 'k7';
+}
+
 function readAllowedDomains() {
   return (process.env.ALLOWED_GOOGLE_DOMAINS || '').split(',');
 }
 
 function postComment(pool, req, res) {  
-  const {idToken, commentText, byText} = req.body;
-  const threadId = 'k7';
+  const {commentText, byText} = req.body;
+  const idToken = readTokenHeader(req);
+  const threadId = readThreadId(req);
   if (!threadId || !commentText || !byText) {
     console.log('Invalid post, missing data');
     return res.status(422).end();
@@ -79,8 +88,8 @@ function insertComment(pool, {threadId, commentText, byText}) {
 
 
 function fetchComments(pool, req, res) {
-  const threadId = 'k7';
-  const idToken = 'foo';
+  const threadId = readThreadId(req);
+  const idToken = readTokenHeader(req);
 
   verifyOrThrow(idToken)
     .then(() => queryComments(pool, threadId))
