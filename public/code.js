@@ -31,13 +31,13 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
     el.appendChild(divWith(`<a style="display: none; href="#" onclick="signOut();">Sign out</a>`));
 
     // initial ui
-    ui.appendChild(divWith(`<div class="Comments-loading">Loading...</div>`));
+    ui.appendChild(divWith(`<div class="Comments-loading">Loading comments...</div>`));
 
     // if not signed in within 5 seconds, assume we can't
     setTimeout(() => {
       if (ui.querySelector('.Comments')) return;
       ui.innerHTML = '';
-      ui.appendChild(divWith(`<div class="Comments-signed-out">You need to sign in with a district Google account to comment.</div>`));
+      ui.appendChild(divWith(`<div class="Comments-signed-out">You need to sign in with a district Google account to see or share comments.</div>`));
     }, 5000);
   }
 
