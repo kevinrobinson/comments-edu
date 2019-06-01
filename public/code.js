@@ -12,69 +12,6 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
   const CLIENT_ID = '363849032314-svlqn5mmlhf35cnc6s9tdsiv9f1oejd4.apps.googleusercontent.com';
   const COMMENTS_EDU_DOMAIN = 'https://comments-edu.herokuapp.com';
 
-
-  function addStyles(el) {
-    const stylesEl = document.createElement('style');
-    stylesEl.innerHTML = `
-      .Comments-ui * {
-        font-family: Arial;
-        font-size: 14px;
-      }
-
-      .Comments h1 {
-        font-size: 18px;
-      }
-
-      .Comments input {
-        padding: 10px;
-        margin-right: 5px;
-      }
-
-      .Comments-bar {
-        display: flex;
-      }
-
-      .Comments-text {
-        flex: 1;
-      }
-
-      .Comments button {
-        padding: 10px;
-        padding-left: 20px;
-        padding-right: 20px;
-        border: 1px solid #eee;
-        background: blue;
-        color: white;
-        cursor: pointer;
-      }
-
-      .Comments-Existing {
-        margin-top: 10px;
-      }
-
-      .Comment {
-        border: 1px solid #eee;
-        background: #f8f8f8;
-        margin-bottom: 10px;
-        padding: 10px;
-      }
-
-      .Comment-comment-text {
-        font-size: 18px;
-        margin-bottom: 2px;
-      }
-
-      .Comment-by-text {
-        color: #999;
-      }
-      .Comment-timestamp {
-        color: #999;
-      }
-    `;
-    document.body.appendChild(stylesEl);
-    return;
-  }
-
   function main() {    
     // add styles and place for ui
     const el = ROOT_EL;
@@ -94,7 +31,6 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
     el.appendChild(divWith(`<a style="display: none; href="#" onclick="signOut();">Sign out</a>`));
 
     // initial ui
-    addStyles(el);
     ui.appendChild(divWith(`<div class="Comments-loading">Loading...</div>`));
 
     // if not signed in within 5 seconds, assume we can't
@@ -150,10 +86,10 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
     <div class="Comments">
       <div class="Comments-Add">
         <h1>Comments</h1>
-        <div class="Comments-bar">
-          <input class="Comments-text" placeholder="What do you think?" />
-          <input class="Comments-nickname" placeholder="Your public nickname" />
-          <button class="Comments-share">Share</button>
+        <div class="Comments-Add-bar">
+          <input class="Comments-Add-text" placeholder="What do you think?" />
+          <input class="Comments-Add-nickname" placeholder="Your public nickname" />
+          <button class="Comments-Add-share">Share</button>
         </div>
       </div>
       <div class="Comments-Existing">
@@ -169,14 +105,14 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
             </div>
           </div>
         {{/comments}}
-        <button class="Comments-Refresh">Refresh comments</button>
       </div>
+      <button class="Comments-Refresh">Refresh comments</button>
     </div>
   `;
 
   function render(el, state) {
     el.innerHTML = renderMustacheTemplate(state);
-    el.querySelector('.Comments-share').addEventListener('click', e => onShare(el, state));
+    el.querySelector('.Comments-Add-share').addEventListener('click', e => onShare(el, state));
     el.querySelector('.Comments-Add').addEventListener('keydown', e => (e.keyCode === 13) && onShare(el, state));
     el.querySelector('.Comments-Refresh').addEventListener('click', e => refreshComments(el, state));
   }
@@ -189,8 +125,8 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
   }
 
   function onShare(el, state) {
-    const text = el.querySelector('.Comments-text').value;
-    const nickname = el.querySelector('.Comments-nickname').value;
+    const text = el.querySelector('.Comments-Add-text').value;
+    const nickname = el.querySelector('.Comments-Add-nickname').value;
 
     if (!text) return alert('Type something first!');
     if (!nickname) return alert('Add a public nickname!');
@@ -206,19 +142,20 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
         timestampz: (new Date()).toString()
       });
       render(el, state);
+      
+      // scroll
+      el.querySelector('.Comments-Existing').scrollTop = el.querySelector('.Comments-Existing').scrollHeight;
     })
   }
 
   // sugar for weird mustache lambda syntax
   function mustacheHelper(fn) {
     return function() {
-      return function(text, render) {
-        return timeSinceNow(render(text));
-      }
+      return fn;
     };
   }
-  function timeSinceNow(text) {
-    const date = dateFns.parse(text);
+  function timeSinceNow(text, render) {
+    const date = dateFns.parse(render(text));
     return `${dateFns.distanceInWordsToNow(date)} ago`;
   }
 

@@ -1,0 +1,63 @@
+.Comments-ui * {
+  font-family: Arial;
+  font-size: 14px;
+}
+
+.Comments h1 {
+  font-size: 18px;
+}
+
+.Comments button {
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border: 1px solid #eee;
+  background: #cc627f;
+  color: white;
+  cursor: pointer;
+}
+
+.Comments-Existing {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  max-height: 390px;
+  overflow-y: scroll;
+}
+
+
+
+/* Adding a comment */
+.Comments-Add-bar {
+  display: flex;
+}
+
+.Comments-Add-text {
+  flex: 1;
+}
+
+.Comments-Add input {
+  padding: 10px;
+  margin-right: 5px;
+}
+
+
+/* how a comment looks */
+.Comment {
+  border: 1px solid #eee;
+  background: #f8f8f8;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.Comment-comment-text {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.Comment-by-text {
+  color: #999;
+}
+
+.Comment-timestamp {
+  color: #999;
+}

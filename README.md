@@ -25,15 +25,15 @@ Make a Postgres database, with tables:
 );
 ```
 
-## Build UI library
-Note that the config here is different for dev and production.
-```
-cd ui-library && yarn install && \
-  REACT_APP_GOOGLE_CLIENT_ID=xyz \
-  REACT_APP_COMMENTS_EDU_DOMAIN=https://example.com \
-  yarn build
-cp build/static/js/main.*.js ../public/library.js
-```
-
 ## Use UI library
 See `public/dev.html`, and note that config is different for dev and production.
+
+
+## Configure for Google
+- See https://developers.google.com/identity/sign-in/web/sign-in
+- Make a project, then create the set up for sign in (an OAuth client and a Web client).
+- In the API Console > Credentials...
+- In the OAuth consent screen, add to "authorized domain"
+- Grant "authorized from javascript"
+
+Then update the config for CORS headers and the Google verification in the app itself.

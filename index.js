@@ -42,19 +42,17 @@ app.use(rateLimit({
 }));
 
 
-
 // Allow CORS
 const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN;
 app.use(cors({origin: CORS_ALLOW_ORIGIN}));
-
 
 // database connection pool
 const pool = createPool();
 
 /* --- endpoints ---------------------------------- */
 app.post('/comments/:thread_id/share', postComment.bind(null, pool));
-app.post('/comments/:thread_id/flag', flagComment.bind(null, pool));
 app.get('/comments/:thread_id', fetchComments.bind(null, pool));
+// app.post('/comments/:thread_id/flag', flagComment.bind(null, pool));
 /* ----------------------------------------------- */
 
 // start server
