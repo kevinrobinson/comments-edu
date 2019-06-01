@@ -97,11 +97,16 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
           <div>No comments yet.</div>
         {{/hasLoaded}}
         {{#comments}}
-          <div class="Comment">
-            <div class="Comment-comment-text">{{comment_text}}</div>
-            <div class="Comment-by-text">by {{by_text}}</div>
-            <div class="Comment-timestamp">
-              {{#time}}{{timestampz}}{{/time}}
+          <div class="Comment" data-comment-id={{id}}>
+            <div class="Comment-body">
+              <div class="Comment-comment-text">{{comment_text}}</div>
+              <div class="Comment-by-text">by {{by_text}}</div>
+              <div class="Comment-timestamp">
+                {{#time}}{{timestampz}}{{/time}}
+              </div>
+            </div>
+            <div class="Comment-actions">
+              {{#id}}<div class="Comment-flag">flag</div>{{/id}}
             </div>
           </div>
         {{/comments}}
@@ -112,9 +117,16 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
 
   function render(el, state) {
     el.innerHTML = renderMustacheTemplate(state);
-    el.querySelector('.Comments-Add-share').addEventListener('click', e => onShare(el, state));
-    el.querySelector('.Comments-Add').addEventListener('keydown', e => (e.keyCode === 13) && onShare(el, state));
-    el.querySelector('.Comments-Refresh').addEventListener('click', e => refreshComments(el, state));
+
+    onEvent(el, '.Comments-Add-share', 'click', e => onShare(el, state));
+    onEvent(el, '.Comments-Add', 'keydown', e => (e.keyCode === 13) && onShare(el, state));
+    onEvent(el, '.Comments-Existing', 'click', e => onFlag(el, state, e));
+    onEvent(el, '.Comments-Refresh', 'click', e => refreshComments(el, state));
+  }
+
+  // sugar
+  function onEvent(el, selector, event, fn) {
+    el.querySelector(selector).addEventListener(event, fn);
   }
   
   function renderMustacheTemplate(state) {
@@ -143,9 +155,29 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
       });
       render(el, state);
       
-      // scroll
+      // scroll to bottom
       el.querySelector('.Comments-Existing').scrollTop = el.querySelector('.Comments-Existing').scrollHeight;
     })
+  }
+
+  function onFlag(el, state, event) {
+    if (!event.target.matches('.Comment-flag')) return;
+
+    const commentEl = event.target.closest('.Comment');
+    const commentId = commentEl.dataset.commentId;
+    const html = commentEl.outerHTML;
+    const location = window.location.href;
+
+    flagComment(idTokenFor(state.user), {
+      commentId,
+      html,
+      location
+    }).then(json => {
+      state.comments = state.comments.filter(comment => {
+        return (!commentId || commentId !== comment.id);
+      });
+      render(el, state);
+    });
   }
 
   // sugar for weird mustache lambda syntax
@@ -154,6 +186,7 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
       return fn;
     };
   }
+
   function timeSinceNow(text, render) {
     const date = dateFns.parse(render(text));
     return `${dateFns.distanceInWordsToNow(date)} ago`;
@@ -168,21 +201,6 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
     return googleUser.getAuthResponse().id_token;
   }
 
-  function postComment(idToken, bodyParams) {
-    const domain = readCommentsEduDomain();
-    const url = `${domain}/comments/1/share`;
-    const options = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Comments-Edu-Token': idToken
-      },
-      method: 'POST',
-      body: JSON.stringify(bodyParams)
-    };
-    return fetch(url, options).then(response => response.json());
-  }
-
   function fetchComments(idToken) {
     const domain = readCommentsEduDomain();
     const url = `${domain}/comments/1`;
@@ -193,6 +211,29 @@ var parse=__webpack_require__(2);function setDate(dirtyDate,dirtyDayOfMonth){var
    
     return fetch(url, {headers})
       .then(response => response.json());
+  }
+
+  function postComment(idToken, bodyParams) {
+    return post(idToken, '/comments/1/share', bodyParams);
+  }
+
+  function flagComment(idToken, bodyParams) {
+    return post(idToken, '/comments/1/flag', bodyParams);
+  }
+
+  function post(idToken, path, bodyParams) {
+    const domain = readCommentsEduDomain();
+    const url = `${domain}${path}`;
+    const options = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Comments-Edu-Token': idToken
+      },
+      method: 'POST',
+      body: JSON.stringify(bodyParams)
+    };
+    return fetch(url, options).then(response => response.json());
   }
 
   main();

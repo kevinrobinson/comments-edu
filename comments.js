@@ -37,8 +37,8 @@ function postComment(pool, req, res) {
   const {commentText, byText} = req.body;
   const idToken = readTokenHeader(req);
   const threadId = readThreadId(req);
-  if (!threadId || !commentText || !byText) {
-    console.log('Invalid post, missing data');
+  if (!idToken || !threadId || !commentText || !byText) {
+    console.log('Aborting postComment, missing data...');
     return res.status(422).end();
   }
 
@@ -70,9 +70,21 @@ async function verifyOrThrow(idToken) {
 
 
 function flagComment(pool, req, res) {
-  const {commentId} = req.body;
-  
-  // TODO(kr)
+  const {commentId, html, location} = req.body;
+  const idToken = readTokenHeader(req);
+  const threadId = readThreadId(req);
+  if (!threadId || !idToken || !commentId || !html || !location) {
+    console.log('Aborting flagComment, missing data...');
+    return res.status(422).end();
+  }
+
+  verifyOrThrow(idToken)
+    .then(() => insertFlag(pool, {threadId, commentId, html, location}))
+    .then(() => res.json({success: true}))
+    .catch(error => {
+      console.error(error);
+      res.status(500);
+    });
 }
 
 
@@ -89,6 +101,21 @@ function insertComment(pool, {threadId, commentText, byText}) {
     })
     .catch(error => {
       console.log('insertComment error', threadId, error);
+      return null;
+    });
+}
+
+function insertFlag(pool, {threadId, commentId, html, location}) {
+  const sql = `INSERT INTO flags(thread_id, comment_id, location, html, timestampz) VALUES ($1, $2, $3, $4, $5)`;
+  const now = new Date();
+  const values = [threadId, commentId, location, html, now];
+  return pool.query(sql, values)
+    .then(response => {
+      console.log('added a flag!');
+      return {success: true};
+    })
+    .catch(error => {
+      console.log('insertFlag error', threadId, error);
       return null;
     });
 }

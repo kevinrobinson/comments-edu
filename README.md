@@ -14,13 +14,23 @@ yarn start
 
 Make a Postgres database, with tables:
 ```
-# CREATE DATABASE "comments-edu-dev";
-# \c "comments-edu-dev";
+# CREATE DATABASE "comments-edu";
+# \c "comments-edu";
+
 # CREATE TABLE comments (
   id serial primary key,
   thread_id text,
   comment_text text,
   by_text text,
+  timestampz timestamptz
+);
+
+# CREATE TABLE flags (
+  id serial primary key,
+  thread_id text,
+  comment_id integer,
+  location text,
+  html text,
   timestampz timestamptz
 );
 ```
@@ -37,3 +47,6 @@ See `public/dev.html`, and note that config is different for dev and production.
 - Grant "authorized from javascript"
 
 Then update the config for CORS headers and the Google verification in the app itself.
+
+## Developing locally
+Use `serve` and `ngrok` to make new code available at a public URL, then update the code.org project to point to it, and iterate away.

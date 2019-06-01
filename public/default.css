@@ -47,6 +47,8 @@
   background: #f8f8f8;
   margin-bottom: 10px;
   padding: 10px;
+  display: flex;
+  flex-direction: row;
 }
 
 .Comment-comment-text {
@@ -60,4 +62,23 @@
 
 .Comment-timestamp {
   color: #999;
+}
+
+.Comment-body {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.Comment-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.Comment-flag {
+  color: #ccc;
+  cursor: pointer;
+}
+
+.Comment-flag:hover {
+  color: #cc627f;
 }
