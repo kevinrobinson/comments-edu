@@ -104,7 +104,7 @@ function fetchComments(pool, req, res) {
 
 function queryComments(pool, threadId, options = {}) {
   const limit = options.limit || 100;
-  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz DESC LIMIT $2';
+  const sql = 'SELECT * FROM comments WHERE thread_id = $1 ORDER BY timestampz ASC LIMIT $2';
   const values = [threadId, limit];
   return pool.query(sql, values)
     .then(response => response.rows)
