@@ -7,6 +7,7 @@ Slides: [comments-edu: Adding commenting to CS projects](https://docs.google.com
   <img src="doc/demo.png" width="400" />
   <img src="doc/code.png" width="400" />
 </div>
+
 ## Start locallly
 
 ```
