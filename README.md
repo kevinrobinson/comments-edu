@@ -1,5 +1,12 @@
-# comments
+# comments-edu
+For including comments in student projects, restricted to district logins only.
 
+Slides: [comments-edu: Adding commenting to CS projects](https://docs.google.com/presentation/d/1ll3FBlOXE_6yUnmxUHnVyDp6QdpTNGEFX61opPhOYgQ/edit)
+
+<div>
+  <img src="doc/demo.png" width="400" />
+  <img src="doc/code.png" width="400" />
+</div>
 ## Start locallly
 
 ```

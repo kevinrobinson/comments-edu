@@ -58,10 +58,11 @@ async function verifyOrThrow(idToken) {
     idToken: idToken,
     audience: clientId
   });
-  const payload = ticket.getPayload();
-  const userId = payload['sub'];
-  const domain = payload['hd'];
 
+  // payload may include other information, but we want as little
+  // permissions, transmission and storage as possible.
+  const payload = ticket.getPayload();
+  const domain = payload['hd'];
   const isSafelistedDomain = (readAllowedDomains().indexOf(domain) !== -1);
   if (!isSafelistedDomain) throw new Error('not authorized; domain not in safelist');
 
