@@ -14,7 +14,7 @@
     "express": "^4.15.2",
     "express-rate-limit": "^3.4.0",
     "google-auth-library": "^3.1.1",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^2.6.1",
     "path-to-regexp": "^3.0.0",
     "pg": "^7.9.0"
   },
